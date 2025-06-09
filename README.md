@@ -10,7 +10,12 @@ A complete solution for building your own Thread Border Router using Raspberry P
        alt="OpenThread Border Router Topology" 
        style="display:block; width:600px;">
 </div>
+
+---
+
 source: [openthread.io](https://openthread.io/codelabs/openthread-border-router)
+
+<br>
 
 A Thread Border Router connects Thread devices to other networks like Wi-Fi or Ethernet, enabling smart home devices to communicate across network boundaries. This project provides:
 
