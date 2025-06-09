@@ -1,0 +1,169 @@
+version: '3'
+
+vars:
+  ESP32H2_PORT: /dev/ttyUSB0
+  ESP32H2_FIRMWARE_URL: https://github.com/espressif/esp-thread-br/releases/download/v1.0.0/ot-rcp-esp32h2.bin
+  ESP32H2_FIRMWARE_PATH: ./firmware/binaries/ot-rcp-esp32h2.bin
+
+tasks:
+  download-esp32h2-firmware:
+    desc: Download pre-built ESP32-H2 OpenThread RCP firmware
+    cmds:
+      - mkdir -p ./firmware/binaries
+      - wget -O {{.ESP32H2_FIRMWARE_PATH}} {{.ESP32H2_FIRMWARE_URL}}
+
+  flash-esp32h2:
+    desc: Flash ESP32-H2 with OpenThread RCP firmware
+    deps: [download-esp32h2-firmware]
+    cmds:
+      - python3 -m pip install esptool
+      - python3 -m esptool --chip esp32h2 --port {{.ESP32H2_PORT}} --baud 460800 write_flash 0x0 {{.ESP32H2_FIRMWARE_PATH}}
+
+  validate-compose:
+    desc: Validate docker-compose.yml file
+    cmds:
+      - docker-compose -f docker-compose.yml config
+
+  start:
+    desc: Start the Thread Border Router stack
+    deps: [validate-compose]
+    cmds:
+      - docker-compose up -d
+
+  stop:
+    desc: Stop the Thread Border Router stack
+    cmds:
+      - docker-compose down
+
+  restart:
+    desc: Restart the Thread Border Router stack
+    cmds:
+      - task: stop
+      - task: start
+
+  logs:
+    desc: View logs from the Thread Border Router stack
+    cmds:
+      - docker-compose logs -f
+
+  status:
+    desc: Check status of the Thread Border Router stack
+    cmds:
+      - docker-compose ps
+
+  network-scan:
+    desc: Scan for Thread networks
+    cmds:
+      - docker-compose exec otbr ot-ctl scan
+
+  network-info:
+    desc: Get Thread network information
+    cmds:
+      - docker-compose exec otbr ot-ctl networkinfo
+
+  setup-raspberry-pi:
+    desc: Complete system setup for Raspberry Pi (must be run as root)
+    cmds:
+      - |
+        if [ "$(id -u)" -ne 0 ]; then
+          echo "This task must be run as root. Please use sudo task setup-raspberry-pi"
+          exit 1
+        fi
+      - apt-get update
+      - apt-get upgrade -y
+      - apt-get install -y docker.io docker-compose python3-pip git curl wget netcat ufw
+      - systemctl enable docker
+      - systemctl start docker
+      - |
+        USER=$(logname || echo $SUDO_USER)
+        if [ -n "$USER" ]; then
+          usermod -aG docker "$USER"
+        fi
+      - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+      - pip3 install esptool pyserial
+      - ufw allow ssh
+      - ufw allow 80/tcp
+      - ufw allow 3000/tcp
+      - ufw allow 8080/tcp
+      - ufw allow 8081/tcp
+      - ufw allow 9090/tcp
+      - |
+        if ! ufw status | grep -q "Status: active"; then
+          echo "y" | ufw enable
+        fi
+      - |
+        cat > /etc/sysctl.d/60-otbr.conf << EOF
+        # Enable IPv6 forwarding
+        net.ipv6.conf.all.forwarding=1
+
+        # Disable IPv6 Router Advertisements
+        net.ipv6.conf.all.accept_ra=0
+        net.ipv6.conf.default.accept_ra=0
+
+        # Increase UDP buffer size for high bandwidth
+        net.core.rmem_max=2097152
+        net.core.wmem_max=2097152
+        EOF
+      - sysctl -p /etc/sysctl.d/60-otbr.conf
+      - ls -l /dev/ttyUSB* /dev/ttyACM* /dev/ttyS* 2>/dev/null || echo "No UART devices found"
+      - echo "Setup complete! Please log out and log back in for group changes to take effect."
+      - echo "Then run: cd diythreadrouter && task start"
+
+  install-deps-raspberry:
+    desc: Install required dependencies on Raspberry Pi (basic version)
+    cmds:
+      - sudo apt-get update
+      - sudo apt-get install -y docker.io docker-compose python3-pip
+      - sudo pip3 install esptool
+      - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+
+  ping-thread-devices:
+    desc: Ping all Thread devices on the network
+    cmds:
+      - |
+        PREFIX=$(docker-compose exec -T otbr ot-ctl prefix)
+        PREFIX=$(echo $PREFIX | grep -oE 'fd[a-f0-9:]+' | head -1)
+
+        if [ -z "$PREFIX" ]; then
+            echo "Error: Could not determine Thread network prefix"
+            exit 1
+        fi
+
+        echo "Thread network prefix: $PREFIX"
+
+        DEVICES=$(docker-compose exec -T otbr ot-ctl neighbor table | grep -oE '([a-f0-9]{4}|\[([a-f0-9:]+)\])')
+
+        if [ -z "$DEVICES" ]; then
+            echo "No Thread devices found in neighbor table"
+            exit 1
+        fi
+
+        echo "Found Thread devices:"
+        echo "$DEVICES"
+
+        for DEVICE in $DEVICES; do
+            # Remove brackets if present
+            DEVICE=$(echo $DEVICE | sed 's/\[\|\]//g')
+
+            # If device is a short address (4 hex digits), convert to IPv6
+            if [[ $DEVICE =~ ^[0-9a-f]{4}$ ]]; then
+                # Check if we have full prefix
+                if [[ $PREFIX =~ ^fd[0-9a-f:]+$ ]]; then
+                    IP="${PREFIX}:0:ff:fe00:${DEVICE}"
+                else
+                    echo "Skipping device $DEVICE (cannot form IPv6 address)"
+                    continue
+                fi
+            else
+                IP="$DEVICE"
+            fi
+
+            echo "Pinging $IP (device $DEVICE)..."
+            docker-compose exec -T otbr ping -c 3 "$IP"
+            echo "-----------------------"
+        done
+
+  clean:
+    desc: Clean up downloaded files
+    cmds:
+      - rm -rf ./firmware/binaries/*
