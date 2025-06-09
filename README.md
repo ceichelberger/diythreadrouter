@@ -36,6 +36,7 @@ A Thread Border Router connects Thread devices to other networks like Wi-Fi or E
    - Thread Border Router: `http://<raspberry-pi-ip>:80`
    - Monitoring Dashboard: `http://<raspberry-pi-ip>:3000`
    - Network Visualizer: `http://<raspberry-pi-ip>:8081`
+   - Container Metrics: `http://<raspberry-pi-ip>:8082`
 
 See the [Getting Started Guide](./docs/setup.md) for detailed instructions.
 
@@ -66,15 +67,22 @@ For detailed documentation, see the [docs/](./docs) directory.
 The system consists of several integrated components:
 
 ```
-┌─────────────────────────────────────────┐
-│              Raspberry Pi 5             │
-│                                         │
-│  ┌───────────────┐    ┌───────────────┐ │
-│  │   OpenThread  │    │  Monitoring   │ │
-│  │ Border Router │    │     Stack     │ │
-│  └───────┬───────┘    └───────────────┘ │
-│          │                              │
-└──────────┼──────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                  Raspberry Pi 5                     │
+│                                                     │
+│  ┌───────────────┐    ┌───────────────────────────┐ │
+│  │   OpenThread  │    │      Monitoring Stack     │ │
+│  │ Border Router │    │                           │ │
+│  └───────┬───────┘    │  ┌─────────┐ ┌─────────┐ │ │
+│          │            │  │Prometheus│ │ Grafana │ │ │
+│          │            │  └────┬────┘ └────┬────┘ │ │
+│          │            │       │           │      │ │
+│          │            │  ┌────┴────┐ ┌────┴────┐ │ │
+│          │            │  │Node     │ │cAdvisor │ │ │
+│          │            │  │Exporter │ │         │ │ │
+│          │            │  └─────────┘ └─────────┘ │ │
+│          │            └───────────────────────────┘ │
+└──────────┼─────────────────────────────────────────┘
            │
            │ UART/SPI
            │
