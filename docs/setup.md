@@ -25,6 +25,8 @@ This guide walks you through setting up the hardware and initial software config
 
 Optional: For more secure mounting, use the 3D-printed case designs in the `3dprint` directory.
 
+
+
 **Success Criteria**: When properly connected, the ESP32-H2 power LED should light up, and the board should be visible when you run `ls /dev/ttyUSB*` or `ls /dev/ttyACM*` on the Raspberry Pi.
 
 ### 2. Raspberry Pi OS Installation
