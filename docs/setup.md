@@ -15,6 +15,9 @@ This guide walks you through setting up the hardware and initial software config
 
 ### 1. Connect ESP32-H2 to Raspberry Pi
 
+<img src="assets/wiring.png" style="width:600px;">
+
+
 | ESP32-H2 Pin | Raspberry Pi Pin | Function |
 |--------------|------------------|----------|
 | VCC (3.3V)   | Pin 1 (3.3V)     | Power    |
@@ -25,6 +28,8 @@ This guide walks you through setting up the hardware and initial software config
 
 Optional: For more secure mounting, use the 3D-printed case designs in the `3dprint` directory.
 
+
+<img src="assets/prototype.jpeg" style="width:600px;">
 
 
 **Success Criteria**: When properly connected, the ESP32-H2 power LED should light up, and the board should be visible when you run `ls /dev/ttyUSB*` or `ls /dev/ttyACM*` on the Raspberry Pi.
