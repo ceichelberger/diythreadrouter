@@ -127,6 +127,19 @@ This guide helps you troubleshoot common issues with your DIY Thread Border Rout
 
 **Solutions**:
 
+### Reset Pin Connection
+
+The RST (reset) pin connection mentioned in earlier versions of the documentation is not required for normal operation:
+
+- Modern ESP32-H2 boards handle automatic reset during flashing via the USB connection
+- The esptool.py utility can typically manage the reset sequence without a dedicated GPIO connection
+
+If you're experiencing issues with automatic reset during flashing:
+
+1. Try using the physical reset button on the ESP32-H2 board (if available) right as the flashing begins
+2. Try a different USB cable or port
+3. Only as a last resort, connect the RST pin to GPIO 18 (Pin 12) on the Raspberry Pi
+
 1. Check Prometheus is running: `docker-compose ps prometheus`
 2. Verify Prometheus can scrape targets:
    ```
