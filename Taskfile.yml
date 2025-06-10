@@ -17,7 +17,20 @@ tasks:
     deps: [download-esp32h2-firmware]
     cmds:
       - python3 -m pip install esptool
-      - python3 -m esptool --chip esp32h2 --port {{.ESP32H2_PORT}} --baud 460800 write_flash 0x0 {{.ESP32H2_FIRMWARE_PATH}}
+      - |
+        # Try to auto-detect port if not explicitly provided
+        if [ "{{.ESP32H2_PORT}}" = "/dev/ttyUSB0" ] && [ ! -e "/dev/ttyUSB0" ]; then
+          PORT=$(ls /dev/ttyACM* /dev/ttyUSB* 2>/dev/null | head -n 1)
+          if [ -n "$PORT" ]; then
+            echo "Auto-detected ESP32-H2 port: $PORT"
+            python3 -m esptool --chip esp32h2 --port "$PORT" --baud 460800 write_flash 0x0 {{.ESP32H2_FIRMWARE_PATH}}
+          else
+            echo "Error: Could not auto-detect ESP32-H2 port. Please connect the device or specify the port manually."
+            exit 1
+          fi
+        else
+          python3 -m esptool --chip esp32h2 --port {{.ESP32H2_PORT}} --baud 460800 write_flash 0x0 {{.ESP32H2_FIRMWARE_PATH}}
+        fi
 
   validate-compose:
     desc: Validate docker-compose.yml file

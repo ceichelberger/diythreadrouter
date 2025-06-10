@@ -34,6 +34,8 @@ This will:
 2. Install esptool.py if needed
 3. Flash the firmware to the ESP32-H2
 
+**Note**: The ESP32-H2 board should be connected via USB for flashing. Modern boards support automatic reset during the flashing process, so a direct reset pin connection to the Raspberry Pi is not required.
+
 **Success Criteria**: The flashing process should complete without errors, showing progress and a successful flash message. The ESP32-H2 will restart automatically after flashing.
 
 ### Manual Flashing

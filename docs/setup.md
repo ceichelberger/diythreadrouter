@@ -24,9 +24,10 @@ This guide walks you through setting up the hardware and initial software config
 | GND          | Pin 6 (GND)      | Ground   |
 | TX           | Pin 10 (RXD)     | UART TX  |
 | RX           | Pin 8 (TXD)      | UART RX  |
-| RST          | Pin 12 (GPIO 18) | Reset    |
 
 Optional: For more secure mounting, use the 3D-printed case designs in the `3dprint` directory.
+
+**Note**: The RST (reset) pin connection is not required for normal operation. The firmware can be flashed via the USB connection, and automatic reset is typically handled by the flashing tools.
 
 
 <img src="assets/prototype.jpeg" style="width:600px;">
