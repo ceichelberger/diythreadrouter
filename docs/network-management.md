@@ -335,4 +335,4 @@ Store this file securely as it contains sensitive information.
 ## Next Steps
 
 - [Device Commissioning Guide](./device-commissioning.md) - Add new devices to your Thread network
-- [Monitoring Guide](../monitoring/monitoring-guide.md) - Monitor your Thread network's performance
+- [Monitoring Guide](./monitoring.md) - Monitor your Thread network's performance

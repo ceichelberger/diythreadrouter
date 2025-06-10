@@ -1,14 +1,30 @@
 # DIY Thread Border Router
+<img src="docs/assets/thread_logo.jpg" alt="Thread Topology" style="float: right; margin-right: 10px; width: 200px;">
 
 A complete solution for building your own Thread Border Router using Raspberry Pi 5 and ESP32-H2, with integrated monitoring and visualization tools.
 
 ## What is a Thread Border Router?
+
+<div style="float:left; margin-right:16px; background:white; padding:8px; border-radius:6px; width:fit-content; display:inline-block;">
+  <img src="https://openthread.io/static/codelabs/openthread-border-router/img/699d673d05a55535_1920.png?hl=de" 
+       alt="OpenThread Border Router Topology" 
+       style="display:block; width:600px;">
+</div>
+
+---
+
+source: [openthread.io](https://openthread.io/codelabs/openthread-border-router)
+
+<br>
 
 A Thread Border Router connects Thread devices to other networks like Wi-Fi or Ethernet, enabling smart home devices to communicate across network boundaries. This project provides:
 
 - **Hardware**: Raspberry Pi 5 + ESP32-H2 radio module
 - **Software**: OpenThread Border Router with observability stack
 - **Documentation**: Step-by-step guides for setup and operation
+
+<img src="docs/assets/prototype.jpeg" alt="Thread Topology" width="600"/>
+
 
 ## Quick Start
 
@@ -20,6 +36,7 @@ A Thread Border Router connects Thread devices to other networks like Wi-Fi or E
    - Thread Border Router: `http://<raspberry-pi-ip>:80`
    - Monitoring Dashboard: `http://<raspberry-pi-ip>:3000`
    - Network Visualizer: `http://<raspberry-pi-ip>:8081`
+   - Container Metrics: `http://<raspberry-pi-ip>:8082`
 
 See the [Getting Started Guide](./docs/setup.md) for detailed instructions.
 
@@ -50,15 +67,22 @@ For detailed documentation, see the [docs/](./docs) directory.
 The system consists of several integrated components:
 
 ```
-┌─────────────────────────────────────────┐
-│              Raspberry Pi 5             │
-│                                         │
-│  ┌───────────────┐    ┌───────────────┐ │
-│  │   OpenThread  │    │  Monitoring   │ │
-│  │ Border Router │    │     Stack     │ │
-│  └───────┬───────┘    └───────────────┘ │
-│          │                              │
-└──────────┼──────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                  Raspberry Pi 5                     │
+│                                                     │
+│  ┌───────────────┐    ┌───────────────────────────┐ │
+│  │   OpenThread  │    │      Monitoring Stack     │ │
+│  │ Border Router │    │                           │ │
+│  └───────┬───────┘    │  ┌─────────┐ ┌─────────┐ │ │
+│          │            │  │Prometheus│ │ Grafana │ │ │
+│          │            │  └────┬────┘ └────┬────┘ │ │
+│          │            │       │           │      │ │
+│          │            │  ┌────┴────┐ ┌────┴────┐ │ │
+│          │            │  │Node     │ │cAdvisor │ │ │
+│          │            │  │Exporter │ │         │ │ │
+│          │            │  └─────────┘ └─────────┘ │ │
+│          │            └───────────────────────────┘ │
+└──────────┼─────────────────────────────────────────┘
            │
            │ UART/SPI
            │

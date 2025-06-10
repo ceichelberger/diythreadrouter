@@ -9,6 +9,7 @@ The DIY Thread Border Router consists of several integrated components, each wit
 - **OpenThread Border Router** - The core Thread networking service
 - **Prometheus** - Metrics collection system
 - **Grafana** - Visualization and dashboarding
+- **cAdvisor** - Container metrics collection
 - **ESP32-H2 firmware** - Thread radio co-processor
 
 ## Directory Structure
@@ -23,6 +24,7 @@ configs/
 │   └── prometheus.yml       # Prometheus configuration
 └── grafana/
     ├── dashboards/          # Dashboard definitions
+    │   └── cadvisor-dashboard.json  # cAdvisor dashboard
     └── provisioning/        # Automatic provisioning configs
         ├── dashboards/      # Dashboard provisioning
         └── datasources/     # Data source provisioning
@@ -67,6 +69,11 @@ scrape_configs:
   - job_name: 'node'        # System metrics
     static_configs:
       - targets: ['prometheus-exporter:9100']
+
+  - job_name: 'cadvisor'    # Container metrics
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: /metrics
 ```
 
 To add additional metrics sources, add new job definitions under `scrape_configs`.
@@ -123,6 +130,7 @@ The overall stack is configured in `docker-compose.yml`. The key services includ
 - **prometheus** - Metrics collection service
 - **grafana** - Visualization service
 - **prometheus-exporter** - System metrics exporter
+- **cadvisor** - Container metrics exporter
 
 Each service's networking, volumes, and environment variables are defined in this file.
 
