@@ -1,5 +1,5 @@
+---
 version: '3'
-
 services:
   # OpenThread Border Router
   otbr:
@@ -7,33 +7,37 @@ services:
     container_name: otbr
     network_mode: host
     privileged: true
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/ttyACM0
+      - /dev/net/tun
     volumes:
-      - /dev/ttyUSB0:/dev/ttyUSB0
       - ./configs/otbr:/etc/otbr
       - otbr-data:/var/lib/otbr
+      - /dev/ttyACM0:/dev/ttyUSB0 # we have to remap to ttyUSB0
+    env_file:
+      - configs/otbr/otbr-env.list
     environment:
-      - OTBR_INFRA_IF_NAME=eth0
-      - OTBR_RADIO_URL=spinel+hdlc+uart:///dev/ttyUSB0
-      - OTBR_WEB=1
-      - OTBR_REST=1
-      - REFERENCE_DEVICE=1
-      - NAT64=1
-      - DNS64=1
-    ports:
-      - "80:80"     # Web interface
-      - "8080:8080" # REST API
+      OT_RCP_DEVICE: spinel+hdlc+uart:///dev/ttyACM0?uart-baudrate=1000000
+      OT_INFRA_IF: wlan0
+      OT_THREAD_IF: wpan0
+      OT_LOG_LEVEL: '7'
+      OTBR_WEB: '1'
+      OTBR_REST: '1'
+      FIREWALL: '0'
+      NAT64: '0'
+      DNS64: '0'
     restart: unless-stopped
     depends_on:
       - prometheus-exporter
-
   # Prometheus Exporter for OTBR metrics
   prometheus-exporter:
     image: prom/node-exporter:latest
     container_name: prometheus-exporter
     ports:
-      - "9100:9100"
+      - '9100:9100'
     restart: unless-stopped
-
   # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:latest
@@ -42,11 +46,10 @@ services:
       - ./configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     restart: unless-stopped
     depends_on:
       - prometheus-exporter
-
   # Grafana for metrics visualization
   grafana:
     image: grafana/grafana:latest
@@ -59,19 +62,10 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
-      - "3000:3000"
+      - '3000:3000'
     restart: unless-stopped
     depends_on:
       - prometheus
-
-  # Thread Network Visualizer
-  thread-visualizer:
-    image: openthread/web-visualizer:latest
-    container_name: thread-visualizer
-    ports:
-      - "8081:80"
-    restart: unless-stopped
-
   # cAdvisor for container metrics
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -86,10 +80,21 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     ports:
-      - "8082:8080"
+      - '8082:8080'
     restart: unless-stopped
-
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - '9000:9000'
+      - '9443:9443'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
 volumes:
-  otbr-data:
-  prometheus-data:
-  grafana-data:
+  otbr-data: null
+  prometheus-data: null
+  grafana-data: null
+  portainer-data: null 

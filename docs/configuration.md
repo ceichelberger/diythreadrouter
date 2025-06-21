@@ -145,7 +145,7 @@ task restart
 Or restart individual services with:
 
 ```bash
-docker-compose restart <service-name>
+docker compose restart <service-name>
 ```
 
 ## Advanced Configuration

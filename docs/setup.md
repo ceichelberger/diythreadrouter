@@ -6,7 +6,7 @@ This guide walks you through setting up the hardware and initial software config
 
 - **Raspberry Pi 5** (4GB+ RAM recommended)
 - **ESP32-H2 development board** (ESP32-H2-DevKitC or equivalent)
-- **USB-to-UART adapter** (if not built into ESP32-H2 board)
+- **USB-C to USB-A Cable** 
 - **Power supply** for Raspberry Pi (3A+ recommended)
 - **Ethernet cable** (for internet connectivity)
 - **MicroSD card** (16GB+ recommended)
@@ -15,23 +15,8 @@ This guide walks you through setting up the hardware and initial software config
 
 ### 1. Connect ESP32-H2 to Raspberry Pi
 
-<img src="assets/wiring.png" style="width:600px;">
-
-
-| ESP32-H2 Pin | Raspberry Pi Pin | Function |
-|--------------|------------------|----------|
-| VCC (3.3V)   | Pin 1 (3.3V)     | Power    |
-| GND          | Pin 6 (GND)      | Ground   |
-| TX           | Pin 10 (RXD)     | UART TX  |
-| RX           | Pin 8 (TXD)      | UART RX  |
-
-Optional: For more secure mounting, use the 3D-printed case designs in the `3dprint` directory.
-
-**Note**: The RST (reset) pin connection is not required for normal operation. The firmware can be flashed via the USB connection, and automatic reset is typically handled by the flashing tools.
-
-
-<img src="assets/prototype.jpeg" style="width:600px;">
-
+The first setup revealed a problem with the 3.3 Volts rail of the Raspberry Pi. DO NOT WIRE like below, as it causes the Raspberry to hit the over-current protection and restart!
+You can wire the ESP32-H2 with the most left USB-C port, designated as UART. Power will also be provided via that port. The other end of the cable goes in to one of the four USB ports on the Raspberry Pi. The UART controller will be visible through on `/dev/ACM0`. 
 
 **Success Criteria**: When properly connected, the ESP32-H2 power LED should light up, and the board should be visible when you run `ls /dev/ttyUSB*` or `ls /dev/ttyACM*` on the Raspberry Pi.
 
