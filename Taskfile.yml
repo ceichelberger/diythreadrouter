@@ -1,6 +1,9 @@
 version: '3'
 
 tasks:
+  default:
+    cmds:
+    - task --list-all
   buildFirmware:
     desc: This pulls in the idf tools and examples from expressif. This is the approach to build/compile the firmware, enabling you to customize steps inbetween. It takes about 10-20 mins to build.
     cmds:
