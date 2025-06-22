@@ -12,6 +12,7 @@ tasks:
 
   _configure_idfpy:
     desc: helper task to configure repo after pull
+    internal: true
     dir: esp-idf/
     cmds:
     - git submodule update --init --recursive # the repo contains many sub-modules that needs to be configured
@@ -20,6 +21,7 @@ tasks:
 
   _build_firmware:
     desc: helper to build firmware
+    internal: true
     dir: esp-idf/examples/openthread/ot_rcp
     interactive: true
     cmds:
@@ -28,6 +30,7 @@ tasks:
     - idf.py build
 
   _flash_firmware_from_build:
+    internal: true
     desc: helper to flash firmware
     dir: esp-idf/examples/openthread/ot_rcp
     cmds:
