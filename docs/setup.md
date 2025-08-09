@@ -41,6 +41,44 @@ Connect to your Raspberry Pi via SSH:
 ```bash
 ssh pi@raspberrypi.local  # Use the hostname or IP address you configured
 ```
+Install GO
+wget "https://dl.google.com/go/$(curl https://go.dev/VERSION?m=text | head -n1).linux-armv6l.tar.gz" -O go.tar.gz. This will install the GO interperter. 
+
+Extract GO to /usr/local -
+Code
+    sudo tar -C /usr/local -xzf go.tar.gz
+
+Set up Go environment variables.
+
+Edit your ~/.bashrc (or ~/.zshrc if you use Zsh) file:
+Code
+
+    nano ~/.bashrc
+
+Add the following lines at the end of the file: 
+Code
+
+    export PATH=$PATH:/usr/local/go/bin
+    export GOPATH=$HOME/go
+
+Save and exit the editor (Ctrl+X, Y, Enter). Apply the changes.
+Code
+
+    source ~/.bashrc
+
+Verify Go installation.
+Code
+
+    go version
+
+This should display the installed Go version.
+
+Install go-task:
+
+Once Go is successfully installed, you can use the go install command to get go-task.
+Code
+go install github.com/go-task/task/v3/cmd/task@latest
+This command downloads and compiles go-task and places the executable in your $GOPATH/bin directory. Since $GOPATH/bin is added to your PATH, you can then run task from any directory.
 
 Update the system:
 
